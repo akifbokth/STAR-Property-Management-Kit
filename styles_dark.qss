@@ -1,0 +1,357 @@
+/* Dark Theme Stylesheet */
+
+/* -------------------- SIDEBAR & BASE STYLES -------------------- */
+
+QWidget {
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 14px;
+}
+
+/* Section Titles */
+#SectionTitle {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Search Input */
+#SearchInput {
+    padding: 8px;
+    border-radius: 5px;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    border: 1px solid #555555;
+}
+
+/* Tables */
+#TenantTable, #PropertyTable, #LandlordTable, #TenancyTable, #PaymentTable, #MaintenanceTable{
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    alternate-background-color: #333333;
+    border: 1px solid #444444;
+    border-radius: 8px;
+    gridline-color: #555555;
+}
+
+QHeaderView::section {
+    background-color: #444444;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 10px;
+    border: none;
+}
+
+/* Table Cells */
+QTableWidget::item {
+    padding: 8px;
+}
+
+QTableWidget::item:selected {
+    background-color: #555555;
+}
+
+QTableWidget::item:hover {
+    background-color: #2a3b4c;
+}
+
+/* Buttons - Primary */
+#PrimaryButton {
+    background-color: #555555;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+}
+
+#PrimaryButton:hover {
+    background-color: #777777;
+}
+
+#PrimaryButton:pressed {
+    background-color: #333333;
+}
+
+/* Buttons - Danger (delete buttons) */
+#DangerButton {
+    background-color: #a33;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+}
+
+#DangerButton:hover {
+    background-color: #c33;
+}
+
+#DangerButton:pressed {
+    background-color: #911;
+}
+
+/* Pagination Buttons */
+#PaginationButton {
+    background-color: #555555;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+#PaginationButton:hover {
+    background-color: #777777;
+}
+
+/* Pagination Label */
+#PaginationLabel {
+    color: #cccccc;
+}
+
+/* Dialog Boxes */
+QDialog {
+    background-color: #2b2b2b;
+    color: #f0f0f0;
+}
+
+/* Inputs in Forms */
+QLineEdit, QTextEdit, QDateEdit {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    border: 1px solid #555555;
+    border-radius: 5px;
+    padding: 6px;
+}
+
+QLineEdit:focus, QTextEdit:focus, QDateEdit:focus {
+    border: 1px solid #777777;
+}
+
+/* Scrollbars */
+QScrollBar:vertical {
+    background: #2c2c2c;
+    width: 12px;
+    margin: 16px 0 16px 0;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background: #555555;
+    min-height: 20px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #777777;
+}
+
+/* Sidebar container */
+#Sidebar {
+    background-color: #1b1b1b;
+    border-right: 1px solid #333;
+}
+
+QListWidget#Sidebar::item {
+    padding: 12px 20px;
+    color: #ccc;
+    font-size: 15px;
+    border-radius: 4px;
+    margin: 4px 8px;
+}
+
+QListWidget#Sidebar::item:selected {
+    background-color: #333;
+    color: #fff;
+}
+
+QListWidget#Sidebar::item:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+QPushButton#SidebarToggleButton {
+    background-color: #555;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+QPushButton#SidebarToggleButton:hover {
+    background-color: #777;
+}
+
+/* -------------------- MANAGER STYLES -------------------- */
+
+/* Section Titles */
+#SectionTitle {
+    font-size: 22px;
+    font-weight: bold;
+    color: #FFFFFF;
+    margin-bottom: 10px;
+}
+
+/* Search Bar */
+#SearchInput {
+    background-color: #2C2C2C;
+    color: #F0F0F0;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #555555;
+}
+#SearchInput:focus {
+    border: 1px solid #4CAF50;
+}
+
+/* Tables */
+#TenantTable, #PropertyTable {
+    background-color: #2C2C2C;
+    alternate-background-color: #383838;
+    color: #F0F0F0;
+    gridline-color: #555555;
+    selection-background-color: #555555;
+    selection-color: #FFFFFF;
+    border: none;
+}
+
+QHeaderView::section {
+    background-color: #444444;
+    color: #F0F0F0;
+    font-weight: bold;
+    padding: 6px;
+    border: 1px solid #333333;
+}
+
+QTableWidget {
+    border: 1px solid #333333;
+    border-radius: 5px;
+}
+
+/* Pagination Info */
+#PaginationLabel {
+    color: #AAAAAA;
+}
+
+/* Form Inputs */
+QLineEdit, QComboBox, QDateEdit {
+    background-color: #2C2C2C;
+    color: #F0F0F0;
+    border: 1px solid #555555;
+    padding: 6px;
+    border-radius: 4px;
+}
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus {
+    border: 1px solid #4CAF50;
+}
+
+QComboBox::drop-down {
+    border: none;
+}
+
+/* Scrollbars */
+QScrollBar:vertical {
+    background: #2C2C2C;
+    width: 12px;
+}
+QScrollBar::handle:vertical {
+    background: #555555;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #4CAF50;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+
+/* Dashboard */
+QWidget#DashboardPage {
+    background-color:rgba(0, 0, 0, 0);
+}
+
+/* Dashboard title labels */
+QWidget#dashboard_title,
+QWidget#alert_title,
+QWidget#insight_title,
+QWidget#quick_actions_title {
+    background-color:rgba(0, 0, 0, 0);
+}
+
+/* Stat cards */
+QFrame#StatCard {
+    background-color: #2c2c3c;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 10px;
+    border: 1px solid #444;
+    min-width: 150px;
+    min-height: 100px;
+}
+
+/* Titles */
+QLabel#SectionTitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Stat count and labels */
+QLabel#StatCount {
+    background-color:rgba(0, 0, 0, 0);
+    font-size: 28px;
+    font-weight: 700;
+    color: #4caf50;
+}
+
+QLabel#StatLabel {
+    background-color:rgba(0, 0, 0, 0);
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+}
+
+/* Alert/Insight text sections */
+QFrame#AlertFrame QLabel,
+QFrame#InsightFrame QLabel {
+    background-color: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: black;
+}
+
+/* Containers */
+QFrame#AlertFrame,
+QFrame#InsightFrame {
+    background-color:rgba(0, 0, 0, 0);
+    border: none;
+}
+
+/* Sidebar activity feed */
+QListWidget#ActivityFeed {
+    background-color: #2b2b3b;
+    border: 1px solid #444;
+    padding: 6px;
+    font-size: 13px;
+    color: white;
+}
+
+QFrame#SidebarContainer {
+    background-color: #1e1e2f;
+}
+
+/* Buttons */
+QPushButton {
+    background-color:rgb(37, 44, 54);
+    color: white;
+    border-radius: 6px;
+    padding: 8px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color:rgb(76, 104, 136);
+}
