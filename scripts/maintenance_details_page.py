@@ -5,16 +5,22 @@ from scripts.database_manager import DatabaseManager
 from scripts.property_picker_dialog import PropertyPickerDialog
 
 
-class MaintenanceDetailsPage(BaseDetailsPage):
+# MaintenanceDetailsPage class to create a dialog for managing maintenance details
+# This class inherits from BaseDetailsPage and provides a form for entering maintenance information
+# It also allows for the selection of a property associated with the maintenance request.
+# The maintenance requests are stored in a SQLite database and can be updated or created.
+
+class MaintenanceDetailsPage(BaseDetailsPage): # This class inherits from BaseDetailsPage to create a custom dialog
+    # Signal emitted when maintenance details are updated
     maintenance_updated = Signal()
 
     def __init__(self, maintenance_data=None, parent=None):
         super().__init__("Maintenance Details", parent)
-        self.db = DatabaseManager()
-        self.maintenance_id = maintenance_data.get("maintenance_id") if maintenance_data else None
-        self.property_id = None
+        self.db = DatabaseManager() # Database manager instance
+        self.maintenance_id = maintenance_data.get("maintenance_id") if maintenance_data else None # Get maintenance ID if provided
+        self.property_id = None # Property ID to be set when a property is selected
 
-        # Property select UI
+        # Property selection button and label
         self.property_btn = QPushButton("Select Property")
         self.property_label = QLabel("No property selected")
         self.property_btn.clicked.connect(self.select_property)
@@ -51,7 +57,7 @@ class MaintenanceDetailsPage(BaseDetailsPage):
         if maintenance_data:
             self.bind_data(maintenance_data)
 
-    def select_property(self):
+    def select_property(self): # Open the property picker dialog to select a property
         dialog = PropertyPickerDialog()
         if dialog.exec():
             selected = dialog.get_selection()
@@ -59,7 +65,7 @@ class MaintenanceDetailsPage(BaseDetailsPage):
                 self.property_id = selected["property_id"]
                 self.property_label.setText(selected["address"])
 
-    def bind_data(self, data):
+    def bind_data(self, data): # Bind the provided data to the form inputs
         self.maintenance_id = data["maintenance_id"]
         self.property_id = data["property_id"]
         self.issue_input.setText(data["issue"])
@@ -71,11 +77,11 @@ class MaintenanceDetailsPage(BaseDetailsPage):
             "SELECT door_number || ' ' || street || ', ' || postcode FROM properties WHERE property_id = ?",
         (self.property_id,), fetchone=True)
 
-        if label:
+        if label: # If the property ID is valid, set the label to the property address
             self.property_label.setText(label[0])
 
-    def collect_data(self):
-        if not self.property_id:
+    def collect_data(self): # Collect data from the form inputs and validate
+        if not self.property_id: # Check if a property is selected
             QMessageBox.warning(self, "Missing Property", "Please select a property.")
             return None
 
@@ -87,12 +93,12 @@ class MaintenanceDetailsPage(BaseDetailsPage):
             "status": self.status_input.currentText()
         }
 
-    def accept(self):
+    def accept(self): # Override the accept method to handle form submission
         data = self.collect_data()
         if not data:
             return
 
-        if self.maintenance_id:
+        if self.maintenance_id: # If maintenance ID is provided, update the existing record
             self.db.execute(
                 """
                 UPDATE maintenance SET property_id = ?, issue = ?, description = ?,
@@ -104,7 +110,8 @@ class MaintenanceDetailsPage(BaseDetailsPage):
                     data["date_reported"], data["status"], self.maintenance_id
                 )
             )
-        else:
+
+        else: # If no maintenance ID is provided, create a new record
             self.db.execute(
                 """
                 INSERT INTO maintenance (property_id, issue, description, date_reported, status)
@@ -116,5 +123,5 @@ class MaintenanceDetailsPage(BaseDetailsPage):
                 )
             )
 
-        self.maintenance_updated.emit()
+        self.maintenance_updated.emit() # Emit the signal to notify that maintenance details have been updated
         super().accept()

@@ -7,16 +7,21 @@ from scripts.tenant_picker_dialog import TenantPickerDialog
 from scripts.tenancy_picker_dialog import TenancyPickerDialog
 
 
-class PaymentDetailsPage(BaseDetailsPage):
-    payment_updated = Signal()
+# PaymentDetailsPage class to create a dialog for managing payment details
+# This class inherits from BaseDetailsPage and provides a form for entering payment information
+# It also allows for the selection of a tenant and tenancy associated with the payment.
+# The payments are stored in a SQLite database and can be updated or created.
+
+class PaymentDetailsPage(BaseDetailsPage): # This class inherits from BaseDetailsPage to create a custom dialog
+    payment_updated = Signal() # Signal emitted when payment details are updated
 
     def __init__(self, payment_id=None, parent=None):
         super().__init__("Payment Details", parent)
-        self.db = DatabaseManager()
-        self.payment_id = payment_id
-        self.is_add_mode = payment_id is None
-        self.tenant_id = None
-        self.tenancy_id = None
+        self.db = DatabaseManager() # Database manager instance
+        self.payment_id = payment_id # Get payment ID if provided
+        self.is_add_mode = payment_id is None # Check if in add mode or edit mode
+        self.tenant_id = None # Tenant ID to be set when a tenant is selected
+        self.tenancy_id = None # Tenancy ID to be set when a tenancy is selected
 
         # Tenant and tenancy selection
         self.tenant_btn = QPushButton("Select Tenant")
@@ -24,6 +29,8 @@ class PaymentDetailsPage(BaseDetailsPage):
         self.tenant_btn.clicked.connect(self.select_tenant)
 
         self.tenancy_btn = QPushButton("Select Tenancy")
+        # disable tenancy picker until tenant chosen
+        self.tenancy_btn.setEnabled(False)
         self.tenancy_label = QLabel("No tenancy selected")
         self.tenancy_btn.clicked.connect(self.select_tenancy)
 
@@ -79,22 +86,26 @@ class PaymentDetailsPage(BaseDetailsPage):
         if not self.is_add_mode:
             self.load_data()
 
-    def select_tenant(self):
-        dialog = TenantPickerDialog(mode="single")  # Set mode to "single" for only one tenant selection
-        dialog.tenant_selected.connect(self.set_selected_tenant)
+    def select_tenant(self): # Open the tenant picker dialog to select a tenant
+        dialog = TenantPickerDialog(mode="single") # Open the tenant picker dialog in single selection mode 
+                                                   # (only one tenant can be selected)
+        dialog.tenant_selected.connect(self.set_selected_tenant) # Connect the signal to set the selected tenant
         dialog.exec()
 
-    def set_selected_tenant(self, tenant):
-        self.tenant_id = tenant["tenant_id"]
-        self.tenant_label.setText(tenant["name"])
+    def set_selected_tenant(self, tenant): # Set the selected tenant and enable the tenancy button
+        self.tenant_id = tenant["tenant_id"] # Get the tenant ID from the selected tenant
+        self.tenant_label.setText(tenant["name"]) # Set the tenant label to the selected tenant's name
 
-    def select_tenancy(self):
-        dialog = TenancyPickerDialog()
-        if dialog.exec():
-            self.tenancy_id, label = dialog.get_selection()
-            self.tenancy_label.setText(label)
+        self.tenancy_btn.setEnabled(True)  # Enable the tenancy button after selecting a tenant
 
-    def bind_data(self, row):
+    def select_tenancy(self): # Open the tenancy picker dialog to select a tenancy
+        # Pass the current tenant_id so the dialog only shows matching tenancies
+        dialog = TenancyPickerDialog(self, tenant_id=self.tenant_id) # Open the tenancy picker dialog
+        if dialog.exec(): # If the dialog is accepted
+            self.tenancy_id, label = dialog.get_selection() # Get the selected tenancy ID and label
+            self.tenancy_label.setText(label) # Set the tenancy label to the selected tenancy's label
+
+    def bind_data(self, row): # Bind the provided data to the form inputs
         self.tenant_id = row["tenant_id"]
         self.tenancy_id = row["tenancy_id"]
         self.payment_date.setDate(QDate.fromString(row["payment_date"], "yyyy-MM-dd"))
@@ -105,28 +116,28 @@ class PaymentDetailsPage(BaseDetailsPage):
         self.type_input.setCurrentText(row["payment_type"])
         self.notes_input.setText(row["notes"] or "")
 
-        tenant_name = self.db.execute(
+        tenant_name = self.db.execute( # Fetch the tenant's name from the database
             "SELECT first_name || ' ' || last_name FROM tenants WHERE tenant_id = ?",
             (self.tenant_id,), fetchone=True
         )
-        self.tenant_label.setText(tenant_name[0] if tenant_name else "")
+        self.tenant_label.setText(tenant_name[0] if tenant_name else "") # Set the tenant label to the tenant's name
 
-        tenancy_label = self.db.execute(
+        tenancy_label = self.db.execute( # Fetch the tenancy label from the database
             "SELECT start_date || ' → ' || end_date FROM tenancies WHERE tenancy_id = ?",
             (self.tenancy_id,), fetchone=True
         )
-        self.tenancy_label.setText(tenancy_label[0] if tenancy_label else "")
+        self.tenancy_label.setText(tenancy_label[0] if tenancy_label else "") # Set the tenancy label to the tenancy's label
 
-    def load_data(self):
+    def load_data(self): # Load data from the database for the given payment ID
         with self.db.cursor() as cur:
             cur.execute("SELECT * FROM payments WHERE payment_id = ?", (self.payment_id,))
             row = cur.fetchone()
-            if row:
+            if row: # If a row is found, bind the data to the form inputs
                 col_names = [desc[0] for desc in cur.description]
                 self.bind_data(dict(zip(col_names, row)))
 
-    def collect_data(self):
-        if not self.tenant_id or not self.tenancy_id:
+    def collect_data(self): # Collect data from the form inputs and validate them
+        if not self.tenant_id or not self.tenancy_id: # Check if a tenant and tenancy are selected
             QMessageBox.warning(self, "Missing Info", "Please select both tenant and tenancy.")
             return None
 
@@ -142,36 +153,38 @@ class PaymentDetailsPage(BaseDetailsPage):
             "notes": self.notes_input.text()
         }
 
-    def accept(self):
+    def accept(self): # Override the accept method to handle form submission
         data = self.collect_data()
         if not data:
             return
 
-        if self.is_add_mode:
+        if self.is_add_mode: # If in add mode, insert a new payment record
             query = """
                 INSERT INTO payments (
                     tenancy_id, tenant_id, payment_date, due_date, amount,
                     method, status, payment_type, notes
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
-            params = (
+            params = ( # Parameters for the SQL query
                 data["tenancy_id"], data["tenant_id"], data["payment_date"], data["due_date"],
                 data["amount"], data["method"], data["status"], data["payment_type"],
                 data["notes"]
             )
-        else:
+
+        else: # If in edit mode, update the existing payment record
             query = """
                 UPDATE payments SET
                     tenancy_id = ?, tenant_id = ?, payment_date = ?, due_date = ?, amount = ?,
                     method = ?, status = ?, payment_type = ?, notes = ?
                 WHERE payment_id = ?
             """
-            params = (
+            params = ( # Parameters for the SQL query
                 data["tenancy_id"], data["tenant_id"], data["payment_date"], data["due_date"],
                 data["amount"], data["method"], data["status"], data["payment_type"],
                 data["notes"], self.payment_id
             )
 
-        self.db.execute(query, params)
-        self.payment_updated.emit()
+        self.db.execute(query, params) # Execute the SQL query with the parameters
+        self.payment_updated.emit() # Emit the signal to notify that payment details have been updated
         super().accept()
+

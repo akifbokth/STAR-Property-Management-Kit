@@ -10,14 +10,20 @@ from scripts.tenancy_manager import TenancyManager
 from scripts.property_manager import PropertyManager
 from scripts.tenant_manager import TenantManager
 
-class DashboardPage(QWidget):
+
+# DashboardPage is a QWidget subclass that represents the main dashboard of the application.
+# It provides an overview of key statistics, alerts, and insights related to properties and tenants.
+# The dashboard is designed to be user-friendly and visually appealing, with a focus on providing
+# quick access to important information and actions.
+
+class DashboardPage(QWidget): # DashboardPage class inherits from QWidget
     def __init__(self):
         super().__init__()
         self.setObjectName("DashboardPage")
-        self.db = DatabaseManager()
-        self.setup_ui()
+        self.db = DatabaseManager() # Initialize the database manager
+        self.setup_ui() # Setup the UI components
 
-    def apply_stylesheet(self, mode="light"):
+    def apply_stylesheet(self, mode="light"): # Apply the stylesheet based on the mode (light or dark)
         path = "styles_light.qss" if mode == "light" else "styles_dark.qss"
         try:
             with open(path, "r") as f:
@@ -25,6 +31,8 @@ class DashboardPage(QWidget):
         except FileNotFoundError:
             print(f"Stylesheet not found: {path}")
 
+    # Setup the UI components
+    # This method creates the layout, widgets, and connections for the dashboard.
     def setup_ui(self):
         main_layout = QHBoxLayout(self)
 
@@ -40,8 +48,8 @@ class DashboardPage(QWidget):
         dashboard_title_layout.addWidget(dashboard_title_label)
         content_layout.addWidget(dashboard_title_container)
 
-        stats_frame = QFrame()
-        stats_layout = QGridLayout(stats_frame)
+        stats_frame = QFrame() # Create a frame for the statistics
+        stats_layout = QGridLayout(stats_frame) # Create a grid layout for the statistics
         stats_layout.setSpacing(20)
         stats_layout.setContentsMargins(20, 10, 20, 10)
         stats_layout.setAlignment(Qt.AlignCenter)
@@ -55,6 +63,8 @@ class DashboardPage(QWidget):
             "Tenancies Ending Soon (30d)": QLabel("0"),
         }
 
+        # Create the statistics cards
+        # Each card is a button that displays a count and a label
         for i, (label, count_label) in enumerate(self.cards.items()):
             card = self.create_stat_card(label, count_label)
             card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -62,6 +72,7 @@ class DashboardPage(QWidget):
 
         content_layout.addWidget(stats_frame)
 
+        # Alerts & Reminders
         alert_title_container = QWidget()
         alert_title_container.setObjectName("alert_title")
         alert_title_layout = QVBoxLayout(alert_title_container)
@@ -70,12 +81,14 @@ class DashboardPage(QWidget):
         alert_title_layout.addWidget(alert_title_label)
         content_layout.addWidget(alert_title_container)
 
+        # Create a frame for the alerts
         self.alerts_layout = QVBoxLayout()
         alert_frame = QFrame()
         alert_frame.setLayout(self.alerts_layout)
         alert_frame.setObjectName("AlertFrame")
         content_layout.addWidget(alert_frame)
 
+        # Insights
         insight_title_container = QWidget()
         insight_title_container.setObjectName("insight_title")
         insight_title_layout = QVBoxLayout(insight_title_container)
@@ -84,18 +97,22 @@ class DashboardPage(QWidget):
         insight_title_layout.addWidget(insight_title_label)
         content_layout.addWidget(insight_title_container)
 
+        # Create a frame for the insights
         self.insights_layout = QVBoxLayout()
         insight_frame = QFrame()
         insight_frame.setLayout(self.insights_layout)
         insight_frame.setObjectName("InsightFrame")
         content_layout.addWidget(insight_frame)
 
-        sidebar_layout = QVBoxLayout()
 
+        # Sidebar for quick actions and activity feed
+        sidebar_layout = QVBoxLayout()
+        # Activity Feed
         self.activity_feed = QListWidget()
         self.activity_feed.setObjectName("ActivityFeed")
         sidebar_layout.addWidget(self.activity_feed)
 
+        # Quick Actions
         quick_actions_title_container = QWidget()
         quick_actions_title_container.setObjectName("quick_actions_title")
         quick_actions_title_layout = QVBoxLayout(quick_actions_title_container)
@@ -113,13 +130,14 @@ class DashboardPage(QWidget):
             ("+ Report Maintenance", self.report_maintenance)
         ]
 
-        for text, slot in buttons:
+        for text, slot in buttons: # Create buttons for quick actions
             btn = QPushButton(text)
             btn.clicked.connect(slot)
             self.quick_actions_panel.addWidget(btn)
 
-        sidebar_layout.addLayout(self.quick_actions_panel)
+        sidebar_layout.addLayout(self.quick_actions_panel) # Add the quick actions panel to the sidebar layout
 
+        # Create a frame for the sidebar
         sidebar_container = QFrame()
         sidebar_container.setObjectName("SidebarContainer")
         sidebar_container.setLayout(sidebar_layout)
@@ -131,7 +149,7 @@ class DashboardPage(QWidget):
         self.load_insights()
         self.load_activity_feed()
 
-    def create_stat_card(self, label_text, count_label):
+    def create_stat_card(self, label_text, count_label): # Create a statistics card
         button = QPushButton()
         button.setObjectName("StatCard")
         button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -154,7 +172,10 @@ class DashboardPage(QWidget):
         button.clicked.connect(lambda _, text=label_text: self.navigate_to(text))
         return button
 
-    def navigate_to(self, label):
+    def navigate_to(self, label): # Navigate to the corresponding manager window based on the label
+        # This method opens the appropriate manager window when a card is clicked.
+
+        # Open the Property Manager if the "Total Properties" card is clicked
         if label == "Total Properties":
             self.pm_window = PropertyManager()
             self.pm_window.show()
@@ -163,6 +184,7 @@ class DashboardPage(QWidget):
             self.pm_window.raise_() # Bring the window to the front
             self.pm_window.resize(900, 600) # Resize the window
 
+        # Open the Tenant Manager if the "Total Tenants" card is clicked
         elif label == "Total Tenants":
             self.tm_window = TenantManager()
             self.tm_window.show()
@@ -171,14 +193,20 @@ class DashboardPage(QWidget):
             self.tm_window.raise_() # Bring the window to the front
             self.tm_window.resize(900, 600) # Resize the window
 
+        # Open the Maintenance Manager if the "Outstanding Maintenance" card is clicked
+        # This will show unresolved maintenance issues
+        # The filter_unresolved parameter is set to True to show only unresolved issues
         elif label == "Outstanding Maintenance":
-            self.mm_window = MaintenanceManager(filter_unresolved=True)
+            self.mm_window = MaintenanceManager(filter_unresolved=True) 
             self.mm_window.show()
             self.mm_window.setWindowTitle("Outstanding Maintenance")
             self.mm_window.setWindowModality(Qt.ApplicationModal) # Ensure the window is modal
             self.mm_window.raise_() # Bring the window to the front
             self.mm_window.resize(900, 600) # Resize the window
 
+        # Open the Property Manager if the "Vacant Properties" card is clicked
+        # This will show properties that are currently vacant
+        # The filter_vacant parameter is set to True to show only vacant properties
         elif label == "Vacant Properties":
             self.pm_window = PropertyManager(filter_vacant=True)
             self.pm_window.show()
@@ -187,6 +215,9 @@ class DashboardPage(QWidget):
             self.pm_window.raise_() # Bring the window to the front
             self.pm_window.resize(900, 600) # Resize the window
 
+        # Open the Tenancy Manager if the "Tenancies Ending Soon (30d)" card is clicked
+        # This will show tenancies that are ending soon
+        # The filter_ending_soon parameter is set to True to show only tenancies ending soon
         elif label == "Tenancies Ending Soon (30d)":
             self.tm_window = TenancyManager(filter_ending_soon=True)
             self.tm_window.show()
@@ -195,26 +226,36 @@ class DashboardPage(QWidget):
             self.tm_window.raise_()
             self.tm_window.resize(900, 600) # Resize the window
 
-    def load_data(self):
+    def load_data(self): # Load data from the database and update the statistics cards
+        # This method fetches data from the database and updates the statistics cards.
         data_queries = {
+            # Query to get the total number of properties
             "Total Properties": (
                 "SELECT COUNT(*) FROM properties", 
                 "🏘️ {}"),
 
+            # Query to get the total number of tenants
             "Total Tenants": (
                 "SELECT COUNT(*) FROM tenants", 
                 "👥 {}"),
 
+            # Query to get the number of rent payments due in the next 30 days
+            # This is to be replaced with a rent calendar
             "Rent Due (30d)": ("""
                 SELECT COUNT(*) FROM payments 
                 WHERE payment_type = 'rent' 
                 AND due_date BETWEEN DATE('now') AND DATE('now', '+30 day')""", 
                 "💸 {}"),
 
+            # Query to get the number of outstanding maintenance issues
+            # This counts issues that are not resolved or voided
             "Outstanding Maintenance": (
                 "SELECT COUNT(*) FROM maintenance WHERE LOWER(status) NOT IN ('resolved', 'voided')",
                 "🔧 {}"),
 
+            # Query to get the number of vacant properties
+            # This counts properties that are not currently tenanted
+            # The subquery checks if the property is not in any active tenancies
             "Vacant Properties": ("""
                 SELECT COUNT(*) FROM properties 
                 WHERE property_id NOT IN (
@@ -222,6 +263,8 @@ class DashboardPage(QWidget):
                     WHERE DATE('now') BETWEEN start_date AND end_date)""", 
                     "📭 {}"),
 
+            # Query to get the number of tenancies ending in the next 30 days
+            # This counts tenancies that have an end date within the next 30 days
             "Tenancies Ending Soon (30d)": ("""
                 SELECT COUNT(*) FROM tenancies 
                 WHERE end_date <= DATE('now', '+30 day')""", 
@@ -232,12 +275,13 @@ class DashboardPage(QWidget):
             value = self.db.fetchval(query)
             self.cards[key].setText(template.format(value))
 
-    def load_alerts(self):
+    def load_alerts(self): # Load alerts and reminders from the database
+        # This method fetches alerts and reminders from the database and displays them.
         self.clear_layout(self.alerts_layout)
         alerts = []
 
         overdue = self.db.fetchval("SELECT COUNT(*) FROM payments WHERE status = 'unpaid' AND due_date < DATE('now')")
-        if overdue:
+        if overdue: # Show the number of overdue payments
             alerts.append(f"🔴 {overdue} overdue payment(s) need attention.")
 
         expiring_docs = self.db.fetchval("""
@@ -251,28 +295,30 @@ class DashboardPage(QWidget):
                 SELECT expiry_date FROM tenancy_documents
             ) WHERE expiry_date IS NOT NULL AND expiry_date <= DATE('now', '+30 day')
         """)
-        if expiring_docs:
+
+        if expiring_docs: # Show the number of expiring documents
             alerts.append(f"📁 {expiring_docs} document(s) expiring in the next 30 days.")
 
         open_issues = self.db.fetchval("SELECT COUNT(*) FROM maintenance WHERE LOWER(status) NOT IN ('resolved', 'closed')")
-        if open_issues:
+        if open_issues: # Show the number of unresolved maintenance issues
             alerts.append(f"🛠 {open_issues} unresolved maintenance issue(s).")
 
-        if not alerts:
+        if not alerts: # If there are no alerts, show a clear message
             label = QLabel("✅ All clear. No urgent issues.")
             self.alerts_layout.addWidget(label)
-        else:
+        else: # If there are alerts, display them
             for alert in alerts:
                 label = QLabel(alert)
                 label.setWordWrap(True)
                 self.alerts_layout.addWidget(label)
 
-    def load_insights(self):
+    def load_insights(self): # Load insights from the database
+        # This method fetches insights from the database and displays them.
         self.clear_layout(self.insights_layout)
         insights = []
 
         ending_tenancies = self.db.fetchval("SELECT COUNT(*) FROM tenancies WHERE end_date <= DATE('now', '+30 day')")
-        if ending_tenancies:
+        if ending_tenancies: # Show the number of tenancies ending soon
             insights.append(f"📅 {ending_tenancies} tenancy(ies) ending within 30 days.")
 
         vacant_properties = self.db.fetchval("""
@@ -282,56 +328,64 @@ class DashboardPage(QWidget):
                 WHERE t.property_id = p.property_id AND DATE('now') BETWEEN t.start_date AND t.end_date
             )
         """)
-        if vacant_properties:
+        if vacant_properties: # Show the number of vacant properties
             insights.append(f"🏠 {vacant_properties} property(ies) currently have no active tenancy.")
 
-        if not insights:
+        if not insights: # If there are no insights, show a clear message
             label = QLabel("✅ No tenancy risks or gaps detected.")
             self.insights_layout.addWidget(label)
         else:
-            for insight in insights:
+            for insight in insights: # If there are insights, display them
                 label = QLabel(insight)
                 label.setWordWrap(True)
                 self.insights_layout.addWidget(label)
 
-    def load_activity_feed(self):
+    def load_activity_feed(self): # Load the activity feed from the database
+        # This method fetches recent activity logs from the database and displays them.
         self.activity_feed.clear()
         activities = self.db.fetchall("""
             SELECT action, details, timestamp FROM activity_logs
             ORDER BY timestamp DESC LIMIT 10
         """)
-        for action, details, timestamp in activities:
+        for action, details, timestamp in activities: # Iterate through the activities and add them to the feed
             self.activity_feed.addItem(f"[{timestamp}] {action} - {details}")
 
-    def clear_layout(self, layout):
+    def clear_layout(self, layout): # Clear the layout by removing all widgets
+        # This method removes all widgets from the specified layout.
         while layout.count():
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.load_data()
-        self.load_alerts()
-        self.load_insights()
-        self.load_activity_feed()
 
-    def add_property(self):
+    def showEvent(self, event): # Handle the show event of the widget
+        # This method is called when the widget is shown.
+        super().showEvent(event)
+        self.load_data() # Refresh the data when the widget is shown
+        self.load_alerts() # Refresh the alerts
+        self.load_insights() # Refresh the insights
+        self.load_activity_feed() # Refresh the activity feed
+
+    def add_property(self): # Open the PropertyDetailsPage dialog to add a new property
+        # This method opens a dialog to add a new property.
         dialog = PropertyDetailsPage()
         if dialog.exec() == QDialog.Accepted:
             self.load_data()  # Refresh dashboard stats
 
-    def add_tenant(self):
+    def add_tenant(self): # Open the TenantDetailsPage dialog to add a new tenant
+        # This method opens a dialog to add a new tenant.
         dialog = TenantDetailsPage()
         if dialog.exec() == QDialog.Accepted:
             self.load_data()
 
-    def record_payment(self):
+    def record_payment(self): # Open the PaymentDetailsPage dialog to record a payment
+        # This method opens a dialog to record a payment.
         dialog = PaymentDetailsPage()
         if dialog.exec() == QDialog.Accepted:
             self.load_data()
 
-    def report_maintenance(self):
+    def report_maintenance(self): # Open the MaintenanceDetailsPage dialog to report maintenance
+        # This method opens a dialog to report maintenance.
         dialog = MaintenanceDetailsPage()
         if dialog.exec() == QDialog.Accepted:
             self.load_data()

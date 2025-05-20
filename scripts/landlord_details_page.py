@@ -14,7 +14,12 @@ from scripts.utils.file_utils import cleanup_temp_preview_folder
 from scripts.utils.image_preview import TempImagePreview
 
 
-class LandlordDetailsPage(BaseDetailsPage):
+# LandlordDetailsPage class to create a dialog for managing landlord details
+# This class inherits from BaseDetailsPage and provides a form for entering landlord information
+# It also allows for the upload, deletion, and previewing of documents associated with the landlord.
+# The documents are stored in a SQLite database and can be previewed in a temporary folder.
+
+class LandlordDetailsPage(BaseDetailsPage): # This class inherits from BaseDetailsPage to create a custom dialog
     def __init__(self, landlord_data=None, parent=None):
         super().__init__("Landlord Details", parent)
         self.db = DatabaseManager()
@@ -22,12 +27,13 @@ class LandlordDetailsPage(BaseDetailsPage):
         self.landlord_data = landlord_data or {}
         self.landlord_id = self.landlord_data.get("landlord_id")
 
-        # === Form Fields ===
+        # === Form Fields === #
         self.first_name_input = QLineEdit()
         self.first_name_input.setToolTip("Enter first name")
         self.last_name_input = QLineEdit()
         self.last_name_input.setToolTip("Enter last name")
         self.email_input = QLineEdit()
+        self.email_input.setPlaceholderText("e.g. johnsmith@mail.com")
         self.email_input.setToolTip("Enter email address")
         self.phone_input = QLineEdit()
         self.phone_input.setToolTip("Enter phone number")
@@ -48,7 +54,7 @@ class LandlordDetailsPage(BaseDetailsPage):
         self.add_form_row("Address", self.address_input)
         self.add_form_row("Status", self.status_input)
 
-        # === Documents Section ===
+        # === Documents Section === #
         self.doc_list = QListWidget()
         self.right_panel.addWidget(QLabel("Supported files: PDF, PNG, JPG"))
         self.right_panel.addWidget(QLabel("Double-click to view document"))
@@ -65,9 +71,10 @@ class LandlordDetailsPage(BaseDetailsPage):
         self.right_panel.addWidget(self.delete_doc_button)
 
         self.bind_data(self.landlord_data)
-        # self.load_documents()  # Delayed until after save
+        if self.landlord_id:
+            self.load_documents()
 
-    def bind_data(self, data):
+    def bind_data(self, data): # Bind the landlord data to the form fields
         self.first_name_input.setText(data.get("first_name", ""))
         self.last_name_input.setText(data.get("last_name", ""))
         self.email_input.setText(data.get("email", ""))
@@ -76,7 +83,7 @@ class LandlordDetailsPage(BaseDetailsPage):
         self.status_input.setCurrentText(data.get("status", "Active"))
 
     def collect_data(self):
-        # === VALIDATION ===
+        # === VALIDATION === #
         validator = FormValidator(self)
         validator.require(self.first_name_input, "First Name") \
                  .require(self.last_name_input, "Last Name") \
@@ -95,7 +102,8 @@ class LandlordDetailsPage(BaseDetailsPage):
             "status": self.status_input.currentText()
         }
 
-    def accept(self):
+    def accept(self): # This method is called when the user clicks the "OK" button
+        # === VALIDATION === #
         data = self.collect_data()
         if data is None:
             return  # Don't save if invalid
@@ -113,21 +121,21 @@ class LandlordDetailsPage(BaseDetailsPage):
                 )
                 self.landlord_id = cur.lastrowid
 
-        self.load_documents()
-        super().accept()
+        self.load_documents() # Reload documents after saving
+        super().accept() # Call the parent class's accept method to close the dialog
 
-    def load_documents(self):
+    def load_documents(self): # Load documents associated with the landlord
         self.doc_list.clear()
-        if not self.landlord_id:
+        if not self.landlord_id: # If landlord ID is not set, do not load documents
             return
         self.documents = self.doc_manager.get_documents("landlord", self.landlord_id)
-        for doc in self.documents:
+        for doc in self.documents: # Iterate through the documents and add them to the list widget
             item = QListWidgetItem(f"{doc['name']} ({doc['type']})")
             item.setData(Qt.UserRole, doc["id"])
             item.setData(Qt.UserRole + 1, doc["filename"])
             self.doc_list.addItem(item)
 
-    def add_document(self):
+    def add_document(self): # Open a dialog to select and upload a document
         if not self.landlord_id:
             QMessageBox.warning(
                 self,
@@ -135,15 +143,15 @@ class LandlordDetailsPage(BaseDetailsPage):
                 "Please save the landlord before uploading documents."
             )
             return
-        dialog = DocumentPickerDialog("landlord", self.landlord_id)
+        dialog = DocumentPickerDialog("landlord", self.landlord_id) # Create a new DocumentPickerDialog instance
         if dialog.exec():
             self.load_documents()
 
-    def delete_document(self):
+    def delete_document(self): # Delete the selected document from the list and the database
 
-        selected_item = self.doc_list.currentItem()
+        selected_item = self.doc_list.currentItem() # Get the currently selected item in the list widget
 
-        if not self.landlord_id:
+        if not self.landlord_id: # If landlord ID is not set, do not delete documents
             QMessageBox.warning(
                 self,
                 "Save Required",
@@ -151,26 +159,31 @@ class LandlordDetailsPage(BaseDetailsPage):
             )
             return
 
-        if not selected_item:
+        if not selected_item: # If no item is selected, show a warning message
             QMessageBox.information(self, "No Selection", "Please select a document to delete.")
             return
         
-        filename = selected_item.data(Qt.UserRole + 1)
+        filename = selected_item.data(Qt.UserRole + 1) # Get the filename of the selected document
+
         confirm = QMessageBox.question(self, "Delete?", f"Delete document '{selected_item.text()}'?")
-        if confirm == QMessageBox.Yes:
+
+        if confirm == QMessageBox.Yes: 
             self.doc_manager.delete_document("landlord", self.landlord_id, filename)
             self.load_documents()
 
-    def preview_document(self, item):
+    def preview_document(self, item): # Preview the selected document in a temporary folder
         filename = item.data(Qt.UserRole + 1)
-        path = self.doc_manager.decrypt_document_to_temp("landlord", self.landlord_id, filename)
-        if not path:
+        # Get the path to the decrypted document
+        path = self.doc_manager.decrypt_document_to_temp("landlord", self.landlord_id, filename) 
+        if not path: # If the path is not valid, show an error message
             return
-        if path.lower().endswith((".png", ".jpg", ".jpeg")):
+        if path.lower().endswith((".png", ".jpg", ".jpeg")): # Check if the file is an image
+            # Create a temporary preview dialog for the image
             self.preview_image(path)
-        elif path.lower().endswith(".pdf"):
+        elif path.lower().endswith(".pdf"): # Check if the file is a PDF
+            # Open the PDF file in the default web browser
             webbrowser.open(path)
 
-    def preview_image(self, path):
+    def preview_image(self, path): # Open a temporary image preview dialog
         dialog = TempImagePreview(path, self)
         dialog.exec()

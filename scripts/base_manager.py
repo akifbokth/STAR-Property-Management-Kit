@@ -6,21 +6,29 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 
 
-class BaseManager(QWidget):
+# BaseManager is a base class for creating a data management interface in a PyQt/PySide application.
+# It provides a layout with a title, a search bar, action buttons (Add, Edit, Delete),
+# a table widget for displaying data, and pagination controls.
+# The class is intended to be subclassed for specific data types and functionalities.
+# It is not meant to be instantiated directly.
+
+class BaseManager(QWidget): # BaseManager class inherits from QWidget
+
+    # Constructor takes title, search placeholder, columns, and parent widget
     def __init__(self, title, search_placeholder, columns, parent=None):
         super().__init__(parent)
 
-        self.items_per_page = 10
-        self.current_page = 0
-        self.filtered_data = []
+        self.items_per_page = 10 # Number of items to display per page
+        self.current_page = 0 # Current page index
+        self.filtered_data = [] # List to hold filtered data
 
-        # === Layouts ===
+        # === Layouts === #
         layout = QVBoxLayout()
         title_label = QLabel(title)
         title_label.setObjectName("SectionTitle")
         layout.addWidget(title_label)
 
-        # === Search Bar ===
+        # === Search Bar === #
         search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(search_placeholder)
@@ -28,18 +36,18 @@ class BaseManager(QWidget):
         search_layout.addWidget(self.search_input)
         layout.addLayout(search_layout)
 
-        # === Action Buttons ===
+        # === Action Buttons === #
         button_layout = QHBoxLayout()
         self.add_button = QPushButton('➕ Add')
         self.edit_button = QPushButton('✏️ Edit')
         self.delete_button = QPushButton('🗑️ Delete')
 
-        # Tooltips
+        # === Tooltips === #
         self.add_button.setToolTip("Create a new entry")
         self.edit_button.setToolTip("Edit the selected item")
         self.delete_button.setToolTip("Delete the selected item")
 
-        # Connections
+        # === Connections === #
         self.add_button.clicked.connect(lambda: self.open_details_dialog(None))
         self.edit_button.clicked.connect(self.handle_edit)
         self.delete_button.clicked.connect(self.handle_delete)
@@ -49,7 +57,7 @@ class BaseManager(QWidget):
         button_layout.addWidget(self.delete_button)
         layout.addLayout(button_layout)
 
-        # === Table Widget ===
+        # === Table Widget === #
         self.table_widget = QTableWidget()
         self.table_widget.setColumnCount(len(columns))
         self.table_widget.setHorizontalHeaderLabels(columns)
@@ -58,18 +66,18 @@ class BaseManager(QWidget):
         self.table_widget.setSortingEnabled(True)
         self.table_widget.itemDoubleClicked.connect(self.handle_double_click)
         self.table_widget.setStyleSheet("""
-            QTableWidget::item:hover {
+            QTableWidget::item:hover { ## Highlight on hover
                 background-color: #cce7ff;
             }
-            QTableWidget::item:selected {
+            QTableWidget::item:selected { ## Highlight on selection
                 background-color: #90caf9;
                 color: black;
             }
         """)
         layout.addWidget(self.table_widget)
 
-        # === Empty State Label ===
-        self.empty_label = QLabel("No data found.")
+        # === Empty State Label === #
+        self.empty_label = QLabel("No data found.") # Placeholder text for empty state/table
         self.empty_label.setAlignment(Qt.AlignCenter)
         self.empty_label.setStyleSheet("""
             color: #888;
@@ -79,12 +87,13 @@ class BaseManager(QWidget):
         """)
         self.empty_label.setVisible(False)
 
-        # Use a fixed-height placeholder to preserve layout structure
+        # Use a fixed-height placeholder to preserve layout structure when the table is empty
+        # This ensures that the empty label does not collapse the layout
         self.empty_label.setMinimumHeight(200)
         layout.addWidget(self.empty_label)
 
 
-        # === Pagination ===
+        # === Pagination === #
         pagination_layout = QHBoxLayout()
         self.prev_button = QPushButton("Previous")
         self.next_button = QPushButton("Next")
@@ -102,6 +111,8 @@ class BaseManager(QWidget):
         layout.addLayout(pagination_layout)
         self.setLayout(layout)
 
+    # === Search Filter === #
+    # This method filters the data based on the search input.
     def apply_search_filter(self):
         query = self.search_input.text().strip().lower()
         self.current_page = 0
@@ -111,6 +122,9 @@ class BaseManager(QWidget):
         ]
         self.refresh_table()
 
+    # === Refresh Table === #
+    # This method refreshes the table with the current page of data.
+    # It updates the table widget, pagination label, and button states.
     def refresh_table(self):
         self.filtered_data = self.get_data()
         start = self.current_page * self.items_per_page
@@ -140,27 +154,32 @@ class BaseManager(QWidget):
         self.prev_button.setEnabled(self.current_page > 0)
         self.next_button.setEnabled(self.current_page < total_pages - 1)
 
-    def go_to_previous_page(self):
+    def go_to_previous_page(self): # This method handles the pagination to go to the previous page.
+        # Check if the current page is greater than 0
         if self.current_page > 0:
             self.current_page -= 1
             self.refresh_table()
 
-    def go_to_next_page(self):
+    def go_to_next_page(self): # This method handles the pagination to go to the next page.
+        # Check if the next page exists
         if (self.current_page + 1) * self.items_per_page < len(self.filtered_data):
             self.current_page += 1
             self.refresh_table()
 
-    def handle_double_click(self):
+    def handle_double_click(self): # This method handles the double-click event on a table row.
+        # Get the selected row index
         selected_row = self.table_widget.currentRow()
         if 0 <= selected_row < len(self.filtered_data):
             self.open_details_dialog(self.filtered_data[selected_row])
 
-    def handle_edit(self):
+    def handle_edit(self): # This method handles the edit button click event.
+        # Get the selected row index
         selected_row = self.table_widget.currentRow()
         if 0 <= selected_row < len(self.filtered_data):
             self.open_details_dialog(self.filtered_data[selected_row])
 
-    def handle_delete(self):
+    def handle_delete(self): # This method handles the delete button click event.
+        # Get the selected row index
         selected_row = self.table_widget.currentRow()
         if 0 <= selected_row < len(self.filtered_data):
             item = self.filtered_data[selected_row]
@@ -173,21 +192,21 @@ class BaseManager(QWidget):
             if confirm == QMessageBox.Yes:
                 self.delete_item(item)
 
-    def get_data(self):
+    def get_data(self): # This method should be overridden in subclasses to provide the data.
         raise NotImplementedError
 
-    def extract_row_values(self, item):
+    def extract_row_values(self, item): # This method should be overridden in subclasses to extract values from the item.
         raise NotImplementedError
 
-    def filter_item(self, item, query):
+    def filter_item(self, item, query): # This method should be overridden in subclasses to filter items based on the search query.
         raise NotImplementedError
 
-    def open_details_dialog(self, item):
+    def open_details_dialog(self, item): # This method should be overridden in subclasses to open a details dialog for the item.
         raise NotImplementedError
 
-    def delete_item(self, item):
+    def delete_item(self, item): # This method should be overridden in subclasses to delete the item.
         raise NotImplementedError
 
-    def load_data(self):
-        self.filtered_data = self.get_data()
-        self.refresh_table()
+    def load_data(self): # This method loads the data and refreshes the table.
+        self.filtered_data = self.get_data() # Get the data
+        self.refresh_table() # Refresh the table with the data
