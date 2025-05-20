@@ -34,6 +34,7 @@ Click the green Code dropdown button (top right). Then select Download ZIP.
 
 ### 2. Build executables with PyInstaller (use VS Code)
 
+#### If you don't see "Initialise Database.exe" in the folder
 ```powershell
 # Build init_database.exe
 pyinstaller `
