@@ -10,7 +10,7 @@ A desktop application for small to mid-sized property management teams, built wi
 * **Secure Document Encryption**: AES‑encrypted storage of sensitive documents, on‑demand decryption for preview
 * **Image Handling**: Upload, preview, and manage property images with an integrated carousel
 * **Database Backup & Cleanup**: One‑click backup of the SQLite database and temp‑preview folder cleanup
-* **Role‑Based Access**: Admin privileges with protection against demoting the last administrator
+* **Role‑Based Access**: Admin privileges included
 * **Installer & Uninstaller**: Windows NSIS installer with desktop/start‑menu shortcuts and full uninstall support
 * **Theming**: Dark and light modes via QSS stylesheets stored in `styles/`
 
@@ -29,26 +29,11 @@ A desktop application for small to mid-sized property management teams, built wi
 
 ## Installation (IMPORTANT)
 
-### 1. Clone the repository
+### 1. Download the GitHub repo as a ZIP file
 
-```bash
-git clone https://github.com/YourOrg/STAR-PMK.git
-cd STAR-PMK
-```
+Click the green Code dropdown button (top right). Then select Download ZIP.
 
-### 2. Initialize the database (development)
-
-```bash
-python init_database.py
-```
-
-### 3. Run in development mode
-
-```bash
-python main.py
-```
-
-### 4. Build executables with PyInstaller
+### 2. Build executables with PyInstaller (use VS Code)
 
 ```powershell
 # Build init_database.exe
@@ -60,7 +45,9 @@ pyinstaller `
   --name init_database `
   --add-data "resources;resources" `
   init_database.py
+```
 
+```powershell
 # Build main.exe
 pyinstaller `
   --noconfirm `
@@ -76,15 +63,24 @@ pyinstaller `
   main.py
 ```
 
-### 5. Build the folders and run the program
+### 3. Build the folders and run the program
 
 Find the main.exe and init_database.exe file in the dist\ folder.
+
+Copy/Move them both into the root directory (where main.py and config.py are situated)
 
 Run init_database.exe first to initialise the database and get the folders ready.
 
 Then you can run main.exe for the actual program.
 
-### 6. Installation Wizard
+---
+
+### Installation Wizard
+
+If you would like a simpler installation wizard, please email me at mbokt001@gold.ac.uk and I can send you the STAR PMK Installer file (Windows only)
+
+I cannot upload the file here as the file is too big for Github to accept.
+
 ---
 
 ## Usage
@@ -94,7 +90,7 @@ Then you can run main.exe for the actual program.
 
    * Username: `admin`
    * Password: `12345`
-3. Enjoy the program!
+3. **Enjoy the program!**
 
 ---
 
