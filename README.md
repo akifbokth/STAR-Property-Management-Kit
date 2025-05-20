@@ -85,6 +85,7 @@ I cannot upload the file here as the file is too big for Github to accept.
 
 ## Usage
 
+0. **Check resources\database** and make sure you have "key.key" and "starpmk_database.db", if they are not there then make sure to rerun "Initialise Database.exe"
 1. **Run** `STAR PMK.exe` (or desktop shortcut).
 2. **Login** with default credentials:
 
