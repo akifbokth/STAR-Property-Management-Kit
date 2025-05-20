@@ -34,7 +34,7 @@ Click the green Code dropdown button (top right). Then select Download ZIP.
 
 ### 2. Build executables with PyInstaller (use VS Code)
 
-#### If you don't see "Initialise Database.exe" in the folder
+#### If you don't see "Initialise Database.exe" in the folder:
 ```powershell
 # Build init_database.exe
 pyinstaller `
@@ -46,7 +46,7 @@ pyinstaller `
   --add-data "resources;resources" `
   init_database.py
 ```
-
+#### If you don't see "main.exe" or "STAR PMK.exe" in the folder:
 ```powershell
 # Build main.exe
 pyinstaller `
@@ -65,13 +65,13 @@ pyinstaller `
 
 ### 3. Build the folders and run the program
 
-Find the main.exe and init_database.exe file in the dist\ folder.
+Find the `main.exe` / `STAR PMK.exe` and `init_database.exe` / `Initialise Database.exe` file in the dist\ folder.
 
 Copy/Move them both into the root directory (where main.py and config.py are situated)
 
-Run init_database.exe first to initialise the database and get the folders ready.
+Run `init_database.exe` / `Initialise Database.exe` first to initialise the database and get the folders ready.
 
-Then you can run main.exe for the actual program.
+Then you can run `main.exe` / `STAR PMK.exe` for the actual program.
 
 ---
 
