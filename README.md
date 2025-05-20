@@ -22,7 +22,6 @@ A desktop application for small to mid-sized property management teams, built wi
 * Python 3.10+ (for development)
 * [PySide6](https://pypi.org/project/PySide6/)
 * SQLite3 (bundled)
-* NSIS (for building the installer)
 * PyInstaller (for packaging)
 
 ---
